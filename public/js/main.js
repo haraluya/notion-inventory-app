@@ -1,7 +1,7 @@
 // 檔案路徑: /public/js/main.js
 // 用途: 應用程式的主進入點。負責協調資料獲取和 UI 更新。
 
-import { state, dom } from './state.js';
+import { state, dom, LOGIN_API_ENDPOINT } from './state.js';
 import { loadDataFromNotion } from './api.js';
 import { initializeEventListeners } from './listeners.js';
 import { 
@@ -12,10 +12,6 @@ import {
     handleCalculation,
     renderDeductionPreview
 } from './ui.js';
-
-// --- 新增：密碼設定 ---
-// 您可以在這裡修改密碼
-const PASSWORD = '60087'; 
 
 /**
  * 應用程式的核心刷新函式。
@@ -89,16 +85,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 檢查密碼的函式
-    function checkPassword() {
-        if (passwordInput.value === PASSWORD) {
-            // 密碼正確，在 session 中記錄狀態並啟動應用
-            sessionStorage.setItem('isAuthenticated', 'true');
-            startApplication();
-        } else {
-            // 密碼錯誤，顯示提示
+    async function checkPassword() {
+        passwordError.classList.add('hidden');
+        passwordSubmit.disabled = true;
+        passwordSubmit.textContent = '驗證中...';
+
+        try {
+            const response = await fetch(LOGIN_API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: passwordInput.value })
+            });
+            const result = await response.json();
+            if (response.ok && result.success) {
+                sessionStorage.setItem('isAuthenticated', 'true');
+                startApplication();
+            } else {
+                throw new Error(result.message || '驗證失敗');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
             passwordError.classList.remove('hidden');
-            passwordInput.value = '';
-            passwordInput.focus();
+            passwordSubmit.disabled = false;
+            passwordSubmit.textContent = '進入';
         }
     }
 

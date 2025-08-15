@@ -1,9 +1,9 @@
 // 檔案路徑: /js/state.js
 // 用途: 集中管理整個應用程式的共用狀態和通用輔助函式。
 
-// API 端點
 export const GET_API_ENDPOINT = '/api/getNotionData';
 export const UPDATE_API_ENDPOINT = '/api/updateNotionData';
+export const LOGIN_API_ENDPOINT = '/api/login';
 
 // 應用程式狀態變數
 export let state = {

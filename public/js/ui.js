@@ -6,21 +6,28 @@ import { state, dom, getUnit, formatNumber, parseNumber } from './state.js';
 /**
  * 顯示一個互動式彈窗
  * @param {string} title - 彈窗標題
- * @param {string|Array} message - 彈窗訊息或要顯示的更新項目列表
+ * @param {string|Array} content - 彈窗訊息或要顯示的更新項目列表
+ * @param {object} [options] - 彈窗選項
+ * @param {string} [options.confirmText='關閉'] - 確認按鈕文字
+ * @param {string} [options.cancelText='取消'] - 取消按鈕文字
+ * @param {Function} [options.onConfirm=null] - 點擊確認後的回呼函式
+ * @param {boolean} [options.showCancel=false] - 是否顯示取消按鈕
  */
-export function showModal(title, message) {
+export function showModal(title, content, options = {}) {
     const modalContainer = document.getElementById('modal-container');
+    const { confirmText = '關閉', cancelText = '取消', onConfirm = null, showCancel = false } = options;
+
     let messageContent = '';
 
-    if (Array.isArray(message)) {
-        let updateListHtml = message.map(update => {
+    if (Array.isArray(content)) {
+        let updateListHtml = content.map(update => {
             const item = state.allItems.find(i => i.pageId === update.pageId);
             const name = item ? (item.id ? `${item.id} (${item.name})` : item.name) : `ID: ${update.pageId}`;
             const unit = item ? getUnit(item) : '';
             return `<li class="text-sm text-gray-800"><span class="font-medium">${name}</span>: 更新為 <span class="font-mono">${formatNumber(update.newStock, item)} ${unit}</span></li>`;
         }).join('');
 
-        if (message.length === 0) {
+        if (content.length === 0) {
             messageContent = '<p class="text-sm text-gray-500">沒有項目被更新。</p>';
         } else {
              messageContent = `<p class="text-sm text-gray-600 mb-2">Notion 資料庫已成功更新以下項目：</p>
@@ -29,18 +36,33 @@ export function showModal(title, message) {
                              </ul>`;
         }
     } else {
-        messageContent = `<p class="text-sm text-gray-600 mb-4">${message}</p>`;
+        messageContent = `<p class="text-sm text-gray-600 mb-4">${content}</p>`;
     }
+
+    const closeModal = () => modalContainer.innerHTML = '';
+
+    const confirmButton = `<button id="modal-confirm-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-md">${confirmText}</button>`;
+    const cancelButton = showCancel ? `<button id="modal-cancel-btn" class="px-4 py-2 bg-gray-200 rounded-md">${cancelText}</button>` : '';
 
     modalContainer.innerHTML = `<div class="modal fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50">
         <div class="modal-content bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
             <h3 class="text-lg font-semibold mb-2">${title}</h3>
             ${messageContent}
-            <div class="mt-4 flex justify-end">
-                <button onclick="document.getElementById('modal-container').innerHTML = ''" class="px-4 py-2 bg-indigo-600 text-white rounded-md">關閉</button>
+            <div class="mt-4 flex justify-end gap-2">
+                ${cancelButton}
+                ${confirmButton}
             </div>
         </div>
     </div>`;
+
+    document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+        if (onConfirm) onConfirm();
+        closeModal();
+    });
+
+    if (showCancel) {
+        document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+    }
 }
 
 /**

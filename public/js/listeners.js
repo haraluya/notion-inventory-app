@@ -131,12 +131,16 @@ export function initializeEventListeners(refreshAppCallback) {
 
     // 全域 - 登出按鈕
     document.getElementById('logout-btn').addEventListener('click', () => {
-        // 顯示確認對話框，增加安全性
-        if (confirm('您確定要登出嗎？')) {
-            sessionStorage.removeItem('isAuthenticated');
-            location.reload();
-        }
+        showModal('確認登出', '您確定要登出系統嗎？', {
+            showCancel: true,
+            confirmText: '確定登出',
+            onConfirm: () => {
+                sessionStorage.removeItem('isAuthenticated');
+                location.reload();
+            }
+        });
     });
+
     document.getElementById('fragrance-search-input').addEventListener('input', (e) => {
         savePendingUpdates('fragrance');
         renderCheckTable('fragrance', e.target.value);

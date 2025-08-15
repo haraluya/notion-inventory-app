@@ -3,11 +3,11 @@ const { Client } = require('@notionhq/client');
 // 從 Vercel 的環境變數中讀取 API 金鑰
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
 
-// 你的三個 Notion 資料庫 ID
+// 從環境變數讀取你的三個 Notion 資料庫 ID
 const DATABASE_IDS = {
-    materials: '23cd43f1a90b814cb7a7e19e0396be93',
-    products: '23cd43f1a90b8184bafdf51c7e18049c',
-    fragrances: '23cd43f1a90b81859c92e8a4739786c8'
+    materials: process.env.NOTION_MATERIALS_DB_ID,
+    products: process.env.NOTION_PRODUCTS_DB_ID,
+    fragrances: process.env.NOTION_FRAGRANCES_DB_ID
 };
 
 // 輔助函式：從 Notion 複雜的屬性物件中提取純文字或數值
@@ -45,6 +45,12 @@ module.exports = async (req, res) => {
             return res.status(200).end();
         }
         
+        // 檢查環境變數是否都已設定
+        if (!DATABASE_IDS.materials || !DATABASE_IDS.products || !DATABASE_IDS.fragrances) {
+            console.error('Server Configuration Error: Database IDs are not set in environment variables.');
+            return res.status(500).json({ message: '伺服器設定錯誤，缺少資料庫 ID。' });
+        }
+
         // 輔助函式：取得一個資料庫的所有頁面
         const getAllPages = async (databaseId) => {
             let allPages = [];
