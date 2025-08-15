@@ -123,7 +123,10 @@ module.exports = async (req, res) => {
         products.sort((a, b) => (a.flavor || '').localeCompare(b.flavor || ''));
 
 
-        res.setHeader('Cache-Control', 's-maxage=1, stale-while-revalidate');
+        // 將快取時間設定為 600 秒 (10 分鐘)
+        // s-maxage: Vercel CDN 會快取 10 分鐘
+        // stale-while-revalidate: 快取過期後，會先回傳舊資料給使用者，並在背景更新快取，確保使用者體驗流暢
+        res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate');
         res.status(200).json({
             materials,
             products,
