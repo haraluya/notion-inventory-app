@@ -129,6 +129,14 @@ export function initializeEventListeners(refreshAppCallback) {
     // 全域 - 重新整理按鈕現在呼叫回呼函式
     document.getElementById('refresh-btn').addEventListener('click', refreshAppCallback);
 
+    // 全域 - 登出按鈕
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        // 顯示確認對話框，增加安全性
+        if (confirm('您確定要登出嗎？')) {
+            sessionStorage.removeItem('isAuthenticated');
+            location.reload();
+        }
+    });
     document.getElementById('fragrance-search-input').addEventListener('input', (e) => {
         savePendingUpdates('fragrance');
         renderCheckTable('fragrance', e.target.value);
