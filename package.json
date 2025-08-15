@@ -1,0 +1,9 @@
+{
+  "name": "notion-inventory-proxy",
+  "version": "1.0.0",
+  "description": "Proxy for Notion API",
+  "main": "api/getNotionData.js",
+  "dependencies": {
+    "@notionhq/client": "^2.2.14"
+  }
+}
